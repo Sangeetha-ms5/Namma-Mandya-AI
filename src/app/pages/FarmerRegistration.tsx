@@ -16,6 +16,7 @@ const taluks = [
 
 export default function FarmerRegistration() {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -36,10 +37,33 @@ export default function FarmerRegistration() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // ✅ CONNECTED TO BACKEND (MONGODB)
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem('farmerProfile', JSON.stringify(formData));
-    navigate('/farmer/profile');
+
+    try {
+      const response = await fetch("http://localhost:5000/api/farmers/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Farmer Registered Successfully 🌱");
+        console.log("Saved to MongoDB:", data);
+
+        navigate('/farmer/profile');
+      } else {
+        alert("Registration Failed ❌");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Server Error ❌");
+    }
   };
 
   return (
@@ -48,6 +72,7 @@ export default function FarmerRegistration() {
 
       <div className="flex items-center justify-center min-h-[calc(100vh-120px)] px-4 py-12">
         <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-12 border-2 border-white/30 shadow-2xl max-w-2xl w-full">
+
           <h1 className="text-4xl font-bold text-white mb-8 text-center flex items-center justify-center gap-3">
             <span>👨‍🌾</span>
             Farmer Registration
@@ -55,6 +80,7 @@ export default function FarmerRegistration() {
           </h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+
             {/* Photo Upload */}
             <div className="flex flex-col items-center mb-8">
               {formData.photo ? (
@@ -64,122 +90,91 @@ export default function FarmerRegistration() {
                     alt="Profile"
                     className="w-32 h-32 rounded-full object-cover border-4 border-white/50"
                   />
-                  <label className="absolute bottom-0 right-0 bg-white rounded-full p-2 cursor-pointer hover:bg-gray-100 transition-colors">
-                    <Upload className="w-5 h-5 text-[#0B7A3E]" />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handlePhotoUpload}
-                      className="hidden"
-                    />
+                  <label className="absolute bottom-0 right-0 bg-white rounded-full p-2 cursor-pointer">
+                    <Upload className="w-5 h-5 text-green-700" />
+                    <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
                   </label>
                 </div>
               ) : (
-                <label className="cursor-pointer bg-white/20 backdrop-blur-md hover:bg-white/30 transition-all px-8 py-4 rounded-2xl border-2 border-white/30 flex items-center gap-3 shadow-lg">
-                  <Upload className="w-6 h-6 text-white" />
-                  <span className="text-white font-medium text-lg">Upload Photo (Optional)</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePhotoUpload}
-                    className="hidden"
-                  />
+                <label className="cursor-pointer bg-white/20 px-8 py-4 rounded-2xl text-white flex items-center gap-3">
+                  <Upload />
+                  Upload Photo
+                  <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
                 </label>
               )}
             </div>
 
             {/* Name */}
-            <div>
-              <label className="block text-white font-medium mb-2 text-lg">Name *</label>
-              <input
-                type="text"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-6 py-4 rounded-xl bg-white/20 border-2 border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/60 text-lg"
-                placeholder="Enter your full name"
-              />
-            </div>
+            <input
+              type="text"
+              placeholder="Name"
+              required
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full p-3 rounded bg-white/20 text-white"
+            />
 
             {/* Phone */}
-            <div>
-              <label className="block text-white font-medium mb-2 text-lg">Phone Number *</label>
-              <input
-                type="tel"
-                required
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-6 py-4 rounded-xl bg-white/20 border-2 border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/60 text-lg"
-                placeholder="Enter your phone number"
-              />
-            </div>
+            <input
+              type="tel"
+              placeholder="Phone"
+              required
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              className="w-full p-3 rounded bg-white/20 text-white"
+            />
 
             {/* Address */}
-            <div>
-              <label className="block text-white font-medium mb-2 text-lg">Address *</label>
-              <textarea
-                required
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                rows={3}
-                className="w-full px-6 py-4 rounded-xl bg-white/20 border-2 border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-white/60 text-lg"
-                placeholder="Enter your full address"
-              />
-            </div>
+            <textarea
+              placeholder="Address"
+              required
+              value={formData.address}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              className="w-full p-3 rounded bg-white/20 text-white"
+            />
 
             {/* Taluk */}
-            <div>
-              <label className="block text-white font-medium mb-2 text-lg">Taluk *</label>
-              <select
-                required
-                value={formData.taluk}
-                onChange={(e) => setFormData({ ...formData, taluk: e.target.value })}
-                className="w-full px-6 py-4 rounded-xl bg-white/20 border-2 border-white/30 text-white focus:outline-none focus:border-white/60 text-lg"
-              >
-                <option value="" className="bg-[#0B7A3E]">Select Taluk</option>
-                {taluks.map((taluk) => (
-                  <option key={taluk} value={taluk} className="bg-[#0B7A3E]">
-                    {taluk}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <select
+              required
+              value={formData.taluk}
+              onChange={(e) => setFormData({ ...formData, taluk: e.target.value })}
+              className="w-full p-3 rounded bg-white/20 text-white"
+            >
+              <option value="">Select Taluk</option>
+              {taluks.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
 
             {/* District */}
-            <div>
-              <label className="block text-white font-medium mb-2 text-lg">District</label>
-              <input
-                type="text"
-                value={formData.district}
-                readOnly
-                className="w-full px-6 py-4 rounded-xl bg-white/10 border-2 border-white/20 text-white/80 text-lg cursor-not-allowed"
-              />
-            </div>
+            <input
+              type="text"
+              value={formData.district}
+              readOnly
+              className="w-full p-3 rounded bg-white/10 text-white"
+            />
 
-            {/* Submit Button */}
+            {/* Submit */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-white to-[#f0f0f0] text-[#0B7A3E] font-bold text-xl py-5 rounded-xl hover:shadow-2xl hover:scale-105 transition-all duration-300"
+              className="w-full bg-white text-green-700 font-bold py-3 rounded hover:scale-105 transition"
             >
-              Register as Farmer 🌱
+              Register Farmer 🌱
             </button>
+
           </form>
 
-          {/* Navigation Buttons */}
-          <div className="flex gap-6 justify-center mt-16">
-            <button
-              onClick={() => window.history.back()}
-              className="bg-white/20 backdrop-blur-lg text-white font-bold text-lg px-10 py-4 rounded-xl hover:bg-white/30 transition-all border-2 border-white/30"
-            >
-              ← Previous Page
+          {/* Navigation */}
+          <div className="flex justify-between mt-10">
+            <button onClick={() => window.history.back()} className="text-white">
+              ← Back
             </button>
-            <Link
-              to="/"
-              className="bg-white/20 backdrop-blur-lg text-white font-bold text-lg px-10 py-4 rounded-xl hover:bg-white/30 transition-all border-2 border-white/30"
-            >
-              🏠 Back to Home
+
+            <Link to="/" className="text-white">
+              Home 🏠
             </Link>
           </div>
+
         </div>
       </div>
     </GreenBackground>

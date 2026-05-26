@@ -23,12 +23,35 @@ export default function ConsumerRegistration() {
     district: 'Mandya'
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    localStorage.setItem('consumerProfile', JSON.stringify(formData));
-    navigate('/consumer/dashboard');
-  };
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
+  try {
+    const response = await fetch("http://localhost:5000/api/consumers/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert("Registered Successfully 🌱");
+      console.log("Saved to MongoDB:", data);
+
+      // ✅ NAVIGATE TO DASHBOARD
+      navigate("/consumer/dashboard");
+    } else {
+      alert("Registration Failed ❌");
+      console.log(data);
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Server Error ❌");
+  }
+};
   return (
     <GreenBackground>
       <Navigation />
